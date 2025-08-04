@@ -20,6 +20,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth.requestMatchers("/actuator/health")
                         .permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
+                        .permitAll()
                         .requestMatchers("/api/v1/employee/**")
                         .authenticated()
                         .anyRequest()

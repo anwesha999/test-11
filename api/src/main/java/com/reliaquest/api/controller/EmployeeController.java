@@ -4,6 +4,12 @@ import com.reliaquest.api.model.CreateEmployeeInput;
 import com.reliaquest.api.model.Employee;
 import com.reliaquest.api.service.EmployeeService;
 import com.reliaquest.api.util.EmployeeUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -21,26 +27,32 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/employee")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Employee Management", description = "APIs for managing employee data")
+@SecurityRequirement(name = "basicAuth")
 public class EmployeeController implements IEmployeeController<Employee, CreateEmployeeInput> {
     private final EmployeeService employeeService;
 
-    /**
-     * Retrieves all employees from the system.
-     * @return ResponseEntity containing list of all employees
-     */
+    @Operation(summary = "Get all employees", description = "Retrieves all employees from the system")
+    @ApiResponses(
+            value = {
+                @ApiResponse(responseCode = "200", description = "Successfully retrieved employees"),
+                @ApiResponse(responseCode = "401", description = "Authentication required")
+            })
     @Override
     public ResponseEntity<List<Employee>> getAllEmployees() {
         log.info("Getting all employees");
         return ResponseEntity.ok(employeeService.getAllEmployees());
     }
 
-    /**
-     * Searches employees by name fragment using Boyer-Moore-like filtering.
-     * @param searchString the name fragment to search for
-     * @return ResponseEntity containing filtered list of employees
-     */
+    @Operation(summary = "Search employees by name", description = "Searches employees by name fragment")
+    @ApiResponses(
+            value = {
+                @ApiResponse(responseCode = "200", description = "Successfully retrieved matching employees"),
+                @ApiResponse(responseCode = "401", description = "Authentication required")
+            })
     @Override
-    public ResponseEntity<List<Employee>> getEmployeesByNameSearch(String searchString) {
+    public ResponseEntity<List<Employee>> getEmployeesByNameSearch(
+            @Parameter(description = "Name fragment to search for") String searchString) {
         log.info("Searching employees: {}", searchString);
         return ResponseEntity.ok(EmployeeUtils.searchByName(employeeService.getAllEmployees(), searchString));
     }
@@ -77,26 +89,33 @@ public class EmployeeController implements IEmployeeController<Employee, CreateE
         return ResponseEntity.ok(EmployeeUtils.getTopKEarners(employeeService.getAllEmployees(), 10));
     }
 
-    /**
-     * Creates a new employee using the builder pattern internally.
-     * @param employeeInput the employee data to create
-     * @return ResponseEntity containing the created employee
-     */
+    @Operation(summary = "Create employee", description = "Creates a new employee (Admin only)")
+    @ApiResponses(
+            value = {
+                @ApiResponse(responseCode = "200", description = "Employee created successfully"),
+                @ApiResponse(responseCode = "400", description = "Invalid input data"),
+                @ApiResponse(responseCode = "401", description = "Authentication required"),
+                @ApiResponse(responseCode = "403", description = "Admin role required")
+            })
     @Override
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Employee> createEmployee(@Valid CreateEmployeeInput employeeInput) {
+    public ResponseEntity<Employee> createEmployee(
+            @Parameter(description = "Employee data to create") @Valid CreateEmployeeInput employeeInput) {
         log.info("Creating employee: {}", employeeInput.getName());
         return ResponseEntity.ok(employeeService.createEmployee(employeeInput));
     }
 
-    /**
-     * Deletes an employee by ID using two-phase commit pattern.
-     * @param id the employee identifier to delete
-     * @return ResponseEntity containing the deleted employee's name
-     */
+    @Operation(summary = "Delete employee", description = "Deletes an employee by ID (Admin only)")
+    @ApiResponses(
+            value = {
+                @ApiResponse(responseCode = "200", description = "Employee deleted successfully"),
+                @ApiResponse(responseCode = "401", description = "Authentication required"),
+                @ApiResponse(responseCode = "403", description = "Admin role required"),
+                @ApiResponse(responseCode = "404", description = "Employee not found")
+            })
     @Override
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> deleteEmployeeById(String id) {
+    public ResponseEntity<String> deleteEmployeeById(@Parameter(description = "Employee ID to delete") String id) {
         log.info("Deleting employee: {}", id);
         try {
             Employee employee = employeeService.getEmployeeById(id);
