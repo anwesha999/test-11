@@ -1,148 +1,295 @@
-# ReliaQuest Coding Challenge
+# Employee API
 
-#### In this assessment you will be tasked with filling out the functionality of different methods that will be listed further down.
+A secure REST API for employee management that provides CRUD operations with authentication, authorization, input validation, rate limiting, and performance optimizations.
 
-These methods will require some level of API interactions with Mock Employee API at http://localhost:8112/api/v1/employee.
+## Project Overview
 
-Please keep the following in mind when doing this assessment: 
-* clean coding practices
-* test driven development 
-* logging
-* scalability
+This application serves as a proxy/adapter to a mock employee service, implementing enterprise-level security features and optimized algorithms for data processing. The API follows RESTful principles and includes comprehensive documentation via Swagger/OpenAPI.
 
-See the section **How to Run Mock Employee API** for further instruction on starting the Mock Employee API.
+## Technology Stack
 
-### Endpoints to implement (API module)
+- **Spring Boot 3.x** - Main application framework
+- **Spring Security 6.x** - Authentication and authorization
+- **Spring Web** - REST API implementation
+- **Jakarta Validation** - Input validation
+- **Lombok** - Code reduction and boilerplate elimination
+- **RestTemplate** - HTTP client for external API integration
+- **SpringDoc OpenAPI** - API documentation and Swagger UI
+- **JUnit 5 & Mockito** - Unit and integration testing
+- **Gradle** - Build automation and dependency management
 
-_See `com.reliaquest.api.controller.IEmployeeController` for details._
+## Architecture
 
-getAllEmployees()
+The application follows a layered architecture with clear separation of concerns:
 
-    output - list of employees
-    description - this should return all employees
+### Controller Layer
+- Handles HTTP requests and responses
+- Implements facade pattern for unified interface
+- Contains security annotations for authorization
+- Performs input validation
 
-getEmployeesByNameSearch(...)
+### Service Layer
+- Contains business logic
+- Implements repository pattern for data access abstraction
+- Acts as adapter to external mock API
+- Handles HTTP communication with RestTemplate
 
-    path input - name fragment
-    output - list of employees
-    description - this should return all employees whose name contains or matches the string input provided
+### Model Layer
+- Employee entity with JSON property mapping
+- Input validation models with constraints
+- Generic response wrapper for API responses
 
-getEmployeeById(...)
+### Security Layer
+- Authentication configuration
+- Authorization rules and role-based access control
+- Rate limiting implementation
+- Global exception handling
 
-    path input - employee ID
-    output - employee
-    description - this should return a single employee
+### Utility Layer
+- Optimized algorithms for data processing
+- Strategy pattern for different operations
+- Performance-focused implementations
 
-getHighestSalaryOfEmployees()
+## Features
 
-    output - integer of the highest salary
-    description - this should return a single integer indicating the highest salary of amongst all employees
+### Security
+- Basic HTTP authentication with encrypted passwords
+- Role-based access control (ADMIN and USER roles)
+- Method-level security with PreAuthorize annotations
+- Input validation with Jakarta validation constraints
+- Rate limiting (100 requests per IP address)
+- Global exception handling with secure error responses
 
-getTop10HighestEarningEmployeeNames()
+### Performance Optimizations
+- Min-heap algorithm for top K elements (O(n log k) complexity)
+- Parallel processing for search operations
+- Stream optimization for aggregation operations
+- Efficient data structures and algorithms
 
-    output - list of employees
-    description - this should return a list of the top 10 employees based off of their salaries
+### API Documentation
+- Interactive Swagger UI for API testing
+- Comprehensive OpenAPI specification
+- Request/response examples and schema documentation
+- Authentication integration in documentation
 
-createEmployee(...)
+### Monitoring and Health
+- Spring Boot Actuator endpoints
+- Health checks and metrics
+- Structured logging with security event tracking
+- Error handling without sensitive data exposure
 
-    body input - attributes necessary to create an employee
-    output - employee
-    description - this should return a single employee, if created, otherwise error
+## API Endpoints
 
-deleteEmployeeById(...)
+### Employee Management
+- `GET /api/v1/employee` - Retrieve all employees
+- `GET /api/v1/employee/search/{searchString}` - Search employees by name fragment
+- `GET /api/v1/employee/{id}` - Get employee by ID
+- `GET /api/v1/employee/highestSalary` - Get highest salary among all employees
+- `GET /api/v1/employee/topTenHighestEarningEmployeeNames` - Get top 10 highest earning employee names
+- `POST /api/v1/employee` - Create new employee (Admin only)
+- `DELETE /api/v1/employee/{id}` - Delete employee by ID (Admin only)
 
-    path input - employee ID
-    output - name of the employee
-    description - this should delete the employee with specified id given, otherwise error
+### System Endpoints
+- `GET /actuator/health` - Application health status
+- `GET /actuator/metrics` - Application metrics
+- `GET /swagger-ui.html` - Interactive API documentation
 
-### Endpoints from Mock Employee API (Server module)
+## Authentication
 
-    request:
-        method: GET
-        full route: http://localhost:8112/api/v1/employee
-    response:
-        {
-            "data": [
-                {
-                    "id": "4a3a170b-22cd-4ac2-aad1-9bb5b34a1507",
-                    "employee_name": "Tiger Nixon",
-                    "employee_salary": 320800,
-                    "employee_age": 61,
-                    "employee_title": "Vice Chair Executive Principal of Chief Operations Implementation Specialist",
-                    "employee_email": "tnixon@company.com",
-                },
-                ....
-            ],
-            "status": "Successfully processed request."
-        }
----
-    request:
-        method: GET
-        path: 
-            id (String)
-        full route: http://localhost:8112/api/v1/employee/{id}
-        note: 404-Not Found, if entity is unrecognizable
-    response:
-        {
-            "data": {
-                "id": "5255f1a5-f9f7-4be5-829a-134bde088d17",
-                "employee_name": "Bill Bob",
-                "employee_salary": 89750,
-                "employee_age": 24,
-                "employee_title": "Documentation Engineer",
-                "employee_email": "billBob@company.com",
-            },
-            "status": ....
-        }
----
-    request:
-        method: POST
-        body: 
-            name (String | not blank),
-            salary (Integer | greater than zero),
-            age (Integer | min = 16, max = 75),
-            title (String | not blank)
-        full route: http://localhost:8112/api/v1/employee
-    response:
-        {
-            "data": {
-                "id": "d005f39a-beb8-4390-afec-fd54e91d94ee",
-                "employee_name": "Jill Jenkins",
-                "employee_salary": 139082,
-                "employee_age": 48,
-                "employee_title": "Financial Advisor",
-                "employee_email": "jillj@company.com",
-            },
-            "status": ....
-        }
----
-    request:
-        method: DELETE
-        body:
-            name (String | not blank)
-        full route: http://localhost:8112/api/v1/employee/{name}
-    response:
-        {
-            "data": true,
-            "status": ....
-        }
+The API uses Basic HTTP authentication with two predefined user accounts:
 
-### How to Run Mock Employee API (Server module)
+### Admin User
+- Username: admin
+- Password: secure123
+- Roles: ADMIN (full access to all operations)
 
-Start **Server** Spring Boot application.
-`./gradlew server:bootRun`
+### Regular User
+- Username: user
+- Password: user123
+- Roles: USER (read-only access)
 
-Each invocation of **Server** application triggers a new list of mock employee data. While live testing, you'll want to keep 
-this server running if you require consistent data. Additionally, the web server will randomly choose when to rate
-limit requests, so keep this mind when designing/implementing the actual Employee API.
+## Setup and Installation
 
-_Note_: Console logs each mock employee upon startup.
+### Prerequisites
+- Java 17 or higher
+- Gradle 7.6 or higher
 
-### Code Formatting
+### Running the Application
 
-This project utilizes Gradle plugin [Diffplug Spotless](https://github.com/diffplug/spotless/tree/main/plugin-gradle) to enforce format
-and style guidelines with every build. 
+1. **Start the Mock Employee Server**
+   ```bash
+   ./gradlew server:bootRun
+   ```
+   The mock server will start on http://localhost:8112
 
-To resolve any errors, you must run **spotlessApply** task.
-`./gradlew spotlessApply`
+2. **Start the Employee API**
+   ```bash
+   ./gradlew api:bootRun
+   ```
+   The API will start on http://localhost:8111
 
+3. **Access Swagger Documentation**
+   Navigate to http://localhost:8111/swagger-ui.html
+
+### Configuration
+
+The application uses environment variables for secure configuration:
+
+```bash
+export ADMIN_USERNAME=admin
+export ADMIN_PASSWORD=your-secure-password
+export SERVER_PORT=8111
+```
+
+For local development, copy the template configuration:
+```bash
+cp api/src/main/resources/application-template.yml api/src/main/resources/application.yml
+```
+
+## Testing
+
+### Running Tests
+```bash
+./gradlew api:test
+```
+
+### Test Coverage
+- Unit tests for all service and controller methods
+- Integration tests for security configuration
+- Mock-based testing for external API integration
+- Validation testing for input constraints
+
+### Manual Testing
+
+#### Using curl
+```bash
+# Get all employees
+curl -u admin:secure123 http://localhost:8111/api/v1/employee
+
+# Create employee
+curl -u admin:secure123 -X POST http://localhost:8111/api/v1/employee \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John Doe","salary":75000,"age":30,"title":"Developer"}'
+
+# Search employees
+curl -u admin:secure123 http://localhost:8111/api/v1/employee/search/John
+```
+
+#### Using Swagger UI
+1. Navigate to http://localhost:8111/swagger-ui.html
+2. Click "Authorize" and enter credentials (admin/secure123)
+3. Test any endpoint using the interactive interface
+
+## Security Features
+
+### Input Validation
+- Name: Required, not blank
+- Salary: Required, positive number
+- Age: Required, range 16-75
+- Title: Required, not blank
+
+### Rate Limiting
+- Limit: 100 requests per IP address
+- Response: 429 Too Many Requests when exceeded
+- Reset: Application restart
+
+### Error Handling
+- Structured error responses
+- No sensitive information leakage
+- Comprehensive logging for security events
+- Proper HTTP status codes
+
+## Performance Characteristics
+
+### Algorithm Complexity
+- Get All Employees: O(1) - Direct API call
+- Search by Name: O(n) - Linear search with parallel processing
+- Get by ID: O(1) - Direct lookup
+- Max Salary: O(n) - Single pass through data
+- Top 10 Earners: O(n log k) where k=10 - Min-heap approach
+- Create/Delete: O(1) - Direct API operations
+
+### Scalability Considerations
+- Stateless design for horizontal scaling
+- Efficient algorithms for large datasets
+- Connection pooling ready
+- Caching strategy implementation ready
+
+## Development
+
+### Code Quality
+- Spotless plugin for consistent code formatting
+- Comprehensive Javadoc documentation
+- Clean code principles and SOLID design patterns
+- Lombok for boilerplate reduction
+
+### Build and Deployment
+```bash
+# Build application
+./gradlew api:build
+
+# Run tests
+./gradlew api:test
+
+# Apply code formatting
+./gradlew api:spotlessApply
+```
+
+## External Dependencies
+
+The application integrates with a mock employee API that provides:
+- Employee data retrieval
+- Employee creation and deletion
+- Search functionality
+- Data persistence simulation
+
+## Monitoring and Observability
+
+### Health Checks
+- Application health endpoint
+- Dependency health verification
+- Database connectivity status
+
+### Metrics
+- Request/response metrics
+- Error rate tracking
+- Performance counters
+- Security event metrics
+
+### Logging
+- Structured logging format
+- Security event logging
+- Error tracking and debugging
+- Request correlation IDs
+
+## Production Considerations
+
+### Security
+- Environment-based configuration
+- Secret management integration
+- HTTPS enforcement
+- Security headers implementation
+
+### Performance
+- Connection pooling configuration
+- Caching strategy implementation
+- Database optimization
+- Load balancing support
+
+### Monitoring
+- Application performance monitoring
+- Error tracking and alerting
+- Log aggregation and analysis
+- Health check automation
+
+## Contributing
+
+1. Follow existing code style and formatting
+2. Write comprehensive tests for new features
+3. Update documentation for API changes
+4. Ensure security best practices are followed
+5. Run all tests before submitting changes
+
+## License
+
+This project is developed as part of a coding assessment and follows enterprise development standards and best practices.
