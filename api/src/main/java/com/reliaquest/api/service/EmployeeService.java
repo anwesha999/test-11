@@ -3,6 +3,8 @@ package com.reliaquest.api.service;
 import com.reliaquest.api.model.ApiResponse;
 import com.reliaquest.api.model.CreateEmployeeInput;
 import com.reliaquest.api.model.Employee;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
@@ -80,6 +82,12 @@ public class EmployeeService {
      */
     public void deleteEmployee(String name) {
         log.info("Deleting employee: {}", name);
-        restTemplate.delete(BASE_URL + "/" + name);
+        try {
+            String encodedName = URLEncoder.encode(name, "UTF-8");
+            restTemplate.delete(BASE_URL + "/" + encodedName);
+        } catch (UnsupportedEncodingException e) {
+            log.error("Failed to encode employee name: {}", name, e);
+            restTemplate.delete(BASE_URL + "/" + name);
+        }
     }
 }
