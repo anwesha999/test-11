@@ -21,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 class EmployeeServiceTest {
     @Mock
     private RestTemplate restTemplate;
+
     private EmployeeService employeeService;
 
     @BeforeEach
