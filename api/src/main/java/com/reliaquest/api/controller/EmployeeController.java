@@ -4,10 +4,12 @@ import com.reliaquest.api.model.CreateEmployeeInput;
 import com.reliaquest.api.model.Employee;
 import com.reliaquest.api.service.EmployeeService;
 import com.reliaquest.api.util.EmployeeUtils;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -81,7 +83,8 @@ public class EmployeeController implements IEmployeeController<Employee, CreateE
      * @return ResponseEntity containing the created employee
      */
     @Override
-    public ResponseEntity<Employee> createEmployee(CreateEmployeeInput employeeInput) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Employee> createEmployee(@Valid CreateEmployeeInput employeeInput) {
         log.info("Creating employee: {}", employeeInput.getName());
         return ResponseEntity.ok(employeeService.createEmployee(employeeInput));
     }
@@ -92,6 +95,7 @@ public class EmployeeController implements IEmployeeController<Employee, CreateE
      * @return ResponseEntity containing the deleted employee's name
      */
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteEmployeeById(String id) {
         log.info("Deleting employee: {}", id);
         try {

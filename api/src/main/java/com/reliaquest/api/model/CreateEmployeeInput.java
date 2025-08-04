@@ -1,11 +1,23 @@
 package com.reliaquest.api.model;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
 public class CreateEmployeeInput {
+    @NotBlank(message = "Name is required")
     private String name;
-    private Integer salary;
+
+    @NotNull(message = "Salary is required") @Positive(message = "Salary must be positive") private Integer salary;
+
+    @NotNull(message = "Age is required") @Min(value = 16, message = "Age must be at least 16")
+    @Max(value = 75, message = "Age must be at most 75")
     private Integer age;
+
+    @NotBlank(message = "Title is required")
     private String title;
 }
